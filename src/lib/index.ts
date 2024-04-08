@@ -1,1 +1,1 @@
-export {PUE} from './my-custom-plugin';
+export {PUE} from './pue';
