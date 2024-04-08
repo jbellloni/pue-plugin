@@ -1,0 +1,50 @@
+name: test-manifest
+description: manifest to play with pue-plugin
+tags:
+initialize:
+  outputs: ['yaml']
+  plugins:
+    teads-curve:
+      path: '@grnsft/if-unofficial-plugins'
+      method: TeadsCurve
+      global-config:
+        interpolation: spline
+    apply-pue:
+      method: PUE
+      path: 'pue-plugin'
+      global-config:
+        pue: 1.6
+tree:
+  children:
+    child-0:
+      defaults:
+        cpu/thermal-design-power: 100
+      pipeline:
+        - teads-curve
+        - apply-pue
+      config:
+        apply-pue:
+          pue: 1.5
+      inputs:
+        - timestamp: 2023-07-06T00:00
+          duration: 1
+          cpu/utilization: 20
+        - timestamp: 2023-07-06T00:01
+          duration: 1
+          cpu/utilization: 80
+          cloud/vendor: gcp
+        - timestamp: 2023-07-06T00:02
+          duration: 1
+          cpu/utilization: 20
+          cloud/vendor: aws
+          cloud/region: eu-central-1
+        - timestamp: 2023-07-06T00:03
+          duration: 1
+          cpu/utilization: 50
+          cloud/vendor: gcp
+          cloud/region: asia-east1
+        - timestamp: 2023-07-06T00:04
+          duration: 1
+          cpu/utilization: 50
+          cloud/vendor: azure
+          cloud/region: southindia
