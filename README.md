@@ -1,91 +1,41 @@
-# if-plugin-template
+# pue-plugin
 
-`if-plugin-template` is an environmental impact calculator template which exposes an API for [IF](https://github.com/Green-Software-Foundation/if) to retrieve energy and embodied carbon estimates.
+Applies a PUE factor to cpu/energy.
 
 ## Implementation
 
-Here can be implementation details of the plugin. For example which API is used, transformations and etc.
+Papaparse is used to parse the csv-file. Also the external zod-package is required.
+
+## Input
+
+cpu/energy is the only required input
+
+1. default: set to 1.58 (global average of large data-centers)
+2. config or global-config: simply add 'pue: 1.3' or whatever you want as config or global-config (demonstrated in the sample manifest)
+3. cloud/vendor: uses average pue values
+    * GCP: 1.1 (should be accurate and up-to-date)
+    * Microsoft Azure: 1.18 (data from 2022 but was accurate)
+    * AWS: 1.2 (suggested by 'internal data', outdated and unreliable)
+4. cloud/vendor and cloud/region: the corresponding PUE is imported from src/pue/cloud_pue_data.csv
+    * GCP: the average 1.1 is used for every region -- needs adaptation
+    * Microsoft Azure: pue depends by continent, thats the only data available right now
+    * AWS: the hypothetical average 1.2 is used everywhere
 
 ## Usage
 
-To run the `<YOUR-CUSTOM-PLUGIN>`, an instance of `PluginInterface` must be created. Then, the plugin's `execute()` method can be called, passing required arguments to it.
+Clone the repository locally. In this directory run
 
-This is how you could run the model in Typescript:
-
-```typescript
-async function runPlugin() {
-  const newModel = await new MyCustomPlugin().configure(params);
-  const usage = await newModel.calculate([
-    {
-      timestamp: '2021-01-01T00:00:00Z',
-      duration: '15s',
-      'cpu-util': 34,
-    },
-    {
-      timestamp: '2021-01-01T00:00:15Z',
-      duration: '15s',
-      'cpu-util': 12,
-    },
-  ]);
-
-  console.log(usage);
-}
-
-runPlugin();
+```shell
+npm install typescript
+npm install papaparse
+npm install zod
+npm run build
+npm link
 ```
 
-## Testing model integration
-
-### Using local links
-
-For using locally developed model in `IF Framework` please follow these steps: 
-
-1. On the root level of a locally developed model run `npm link`, which will create global package. It uses `package.json` file's `name` field as a package name. Additionally name can be checked by running `npm ls -g --depth=0 --link=true`.
-2. Use the linked model in impl by specifying `name`, `method`, `path` in initialize models section. 
-
-```yaml
-name: plugin-demo-link
-description: loads plugin
-tags: null
-initialize:
-  plugins:
-    my-custom-plugin:
-      method: MyCustomPlugin
-      path: "<name-field-from-package.json>"
-      global-config:
-        ...
-...
+Switch to the if directory and run
+```shell
+npm link ../pue-plugin
 ```
 
-### Using directly from Github
-
-You can simply push your model to the public Github repository and pass the path to it in your impl.
-For example, for a model saved in `github.com/my-repo/my-model` you can do the following:
-
-npm install your model: 
-
-```
-npm install -g https://github.com/my-repo/my-model
-```
-
-Then, in your `impl`, provide the path in the model instantiation. You also need to specify which class the model instantiates. In this case you are using the `PluginInterface`, so you can specify `OutputModel`. 
-
-```yaml
-name: plugin-demo-git
-description: loads plugin
-tags: null
-initialize:
-  plugins:
-    my-custom-plugin:
-      method: MyCustomPlugin
-      path: https://github.com/my-repo/my-model
-      global-config:
-        ...
-...
-```
-
-Now, when you run the `manifest` using the IF CLI, it will load the model automatically. Run using:
-
-```sh
-ie --manifest <path-to-your-impl> --output <path-to-save-output>
-```
+Now you can use the method _PUE_ with path _pue-plugin_ in your manifest. **A sample manifest can be found in inputs.**
